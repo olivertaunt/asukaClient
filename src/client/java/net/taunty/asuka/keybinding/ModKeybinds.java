@@ -1,4 +1,4 @@
-package net.taunty.skyblockesp.keybinding;
+package net.taunty.asuka.keybinding;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.taunty.skyblockesp.gui.ClickGUI;
+import net.taunty.asuka.gui.ClickGUI;
 import org.lwjgl.glfw.GLFW;
 
 public class ModKeybinds{

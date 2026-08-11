@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "net.taunty.skyblockesp.mixin",
+	"package": "net.taunty.asuka.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"ExampleMixin"

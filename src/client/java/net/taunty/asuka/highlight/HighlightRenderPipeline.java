@@ -1,4 +1,4 @@
-package net.taunty.skyblockesp.highlight;
+package net.taunty.asuka.highlight;
 
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
@@ -11,7 +11,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
-import net.taunty.skyblockesp.keybinding.ModKeybinds;
+import net.taunty.asuka.keybinding.ModKeybinds;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
@@ -28,12 +28,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.StagedVertexBuffer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import net.taunty.skyblockesp.SkyblockESP;
+import net.taunty.asuka.Asuka;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ public class HighlightRenderPipeline {
 
     private static final RenderPipeline FILLED_THROUGH_WALLS = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-                    .withLocation(SkyblockESP.id("pipeline/highlight_through_walls"))
+                    .withLocation(Asuka.id("pipeline/highlight_through_walls"))
                     .withDepthStencilState(Optional.empty())
                     .build()
     );
@@ -178,7 +177,7 @@ public class HighlightRenderPipeline {
 
         try (RenderPass renderPass = RenderSystem.getDevice()
                 .createCommandEncoder()
-                .createRenderPass(() -> SkyblockESP.MOD_ID + " highlight render", colorTexture, Optional.empty(), mainTarget.getDepthTextureView(), OptionalDouble.empty())) {
+                .createRenderPass(() -> Asuka.MOD_ID + " highlight render", colorTexture, Optional.empty(), mainTarget.getDepthTextureView(), OptionalDouble.empty())) {
             renderPass.setPipeline(pipeline);
             RenderSystem.bindDefaultUniforms(renderPass);
             renderPass.setUniform("DynamicTransforms", dynamicTransforms);

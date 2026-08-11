@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "skyblockesp",
+	"id": "asuka",
 	"version": "${version}",
-	"name": "SkyblockESP",
+	"name": "Asuka",
 	"description": "ESP mod for Hypixel Skyblock",
 	"authors": [
 		"taunty"
@@ -12,21 +12,21 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/skyblockesp/asuka.jpg",
+	"icon": "assets/asuka/asuka.jpg",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"net.taunty.skyblockesp.SkyblockESP"
+			"net.taunty.asuka.Asuka"
 		],
 		"client": [
-			"net.taunty.skyblockesp.SkyblockESPClient"
+			"net.taunty.asuka.AsukaClient"
 		],
 		"fabric-datagen": [
-			"net.taunty.skyblockesp.SkyblockESPDataGenerator"
+			"net.taunty.asuka.AsukaDataGenerator"
 		]
 	},
 	"mixins": [
-		"skyblockesp.mixins.json"
+      "asuka.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.19.3",

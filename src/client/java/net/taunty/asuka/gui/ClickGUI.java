@@ -1,10 +1,10 @@
-package net.taunty.skyblockesp.gui;
+package net.taunty.asuka.gui;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.taunty.skyblockesp.keybinding.ModKeybinds;
+import net.taunty.asuka.keybinding.ModKeybinds;
 
 public class ClickGUI extends Screen {
 
@@ -47,7 +47,7 @@ public class ClickGUI extends Screen {
         // border
         graphics.fill(panelX, panelY, panelX + panelW, panelY + 2, ACCENT_COLOUR);
 
-        graphics.text(this.font, "taunty client", panelX + 10, panelY + 10, ACCENT_COLOUR, false);
+        graphics.text(this.font, "Asuka", panelX + 10, panelY + 10, ACCENT_COLOUR, false);
 
         boolean hovered = mouseX >= bounds.x() && mouseX <= bounds.x() + bounds.width() && mouseY >= bounds.y() && mouseY <= bounds.y() + bounds.height();
         graphics.fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), hovered ? ACCENT_COLOUR : 0xFF303040);
