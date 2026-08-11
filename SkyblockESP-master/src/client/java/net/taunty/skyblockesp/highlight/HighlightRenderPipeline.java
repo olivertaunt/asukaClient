@@ -11,6 +11,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.taunty.skyblockesp.keybinding.ModKeybinds;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
@@ -64,6 +65,10 @@ public class HighlightRenderPipeline {
     }
 
     private static void extractHighlights(LevelExtractionContext context) {
+        if (!ModKeybinds.isEnabledNodeESP()){
+            highlightStates = new ArrayList<>();
+            return;
+        }
         ClientLevel world = Minecraft.getInstance().level;
         LocalPlayer player = Minecraft.getInstance().player;
 
