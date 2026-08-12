@@ -32,28 +32,6 @@ public class ClickGUI extends Screen {
         return new ButtonBounds(btnX, btnY, btnW, btnH);
     }
 
-    @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta){
-        ButtonBounds bounds = getButtonBounds();
-
-        int panelX = width / 2 - 100;
-        int panelY = height / 2 - 60;
-        int panelW = 200;
-        int panelH = 120;
-
-        // background :p
-        graphics.fill(panelX, panelY, panelX + panelW, panelY+panelH, BACKGROUND_COLOUR);
-
-        // border
-        graphics.fill(panelX, panelY, panelX + panelW, panelY + 2, ACCENT_COLOUR);
-
-        graphics.text(this.font, "Asuka", panelX + 10, panelY + 10, ACCENT_COLOUR, false);
-
-        boolean hovered = mouseX >= bounds.x() && mouseX <= bounds.x() + bounds.width() && mouseY >= bounds.y() && mouseY <= bounds.y() + bounds.height();
-        graphics.fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), hovered ? ACCENT_COLOUR : 0xFF303040);
-        graphics.text(this.font, "Toggle Node ESP", bounds.x() + 8, bounds.y() + 6, 0xFFFFFFFF, false);
-    }
-
     /**
      * Checks whether mouse clicks inside box and toggles module
      * @param event;
@@ -67,8 +45,35 @@ public class ClickGUI extends Screen {
         ButtonBounds bounds = getButtonBounds();
         if (mouseX >= bounds.x() && mouseX <= bounds.x() + bounds.width() && mouseY >= bounds.y() && mouseY <= bounds.y() + bounds.height()) {
             ModKeybinds.toggleNodeESP();
+
             return true;
         }
         return super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta){
+        ButtonBounds bounds = getButtonBounds();
+        boolean NodeESP = ModKeybinds.isEnabledNodeESP();
+
+        int panelX = width / 2 - 150;
+        int panelY = height / 2 - 90;
+        int panelW = 300;
+        int panelH = 180;
+
+        // background :p
+        graphics.fill(panelX, panelY, panelX + panelW, panelY+panelH, BACKGROUND_COLOUR);
+
+        // border
+        graphics.fill(panelX, panelY, panelX + panelW, panelY + 2, ACCENT_COLOUR);
+
+        graphics.text(this.font, "Asuka", panelX + 10, panelY + 10, ACCENT_COLOUR, false);
+
+        boolean hovered = mouseX >= bounds.x() && mouseX <= bounds.x() + bounds.width() && mouseY >= bounds.y() && mouseY <= bounds.y() + bounds.height();
+
+        graphics.fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), hovered ? ACCENT_COLOUR : 0xFF303040);
+        graphics.fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), NodeESP ? ACCENT_COLOUR : 0xFF303040);
+
+        graphics.text(this.font, "Toggle Node ESP", bounds.x() + 8, bounds.y() + 6, 0xFFFFFFFF, false);
     }
 }

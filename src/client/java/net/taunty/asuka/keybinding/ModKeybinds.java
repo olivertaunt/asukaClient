@@ -14,18 +14,18 @@ public class ModKeybinds{
     private static KeyMapping clickGuiKey;
     private static boolean nodeESPToggle = false;
     private static boolean clickGUIToggle = false;
-    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("skyblockesp", "render"));
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("asuka", "render"));
 
     public static void register() {
         nodeEspKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.skyblockesp.toggle_nodeesp",
+                "key.asuka.node_esp",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_N,
                 CATEGORY
         ));
 
         clickGuiKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.skyblockesp.click_gui",
+                "key.asuka.click_gui",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
                 CATEGORY

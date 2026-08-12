@@ -7,7 +7,7 @@ loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		"skyblockesp" {
+		"asuka" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
