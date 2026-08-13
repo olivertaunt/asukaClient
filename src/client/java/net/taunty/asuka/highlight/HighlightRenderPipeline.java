@@ -11,6 +11,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ColorCollection;
 import net.taunty.asuka.keybinding.ModKeybinds;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -34,12 +36,22 @@ import net.minecraft.world.phys.Vec3;
 
 import net.taunty.asuka.Asuka;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 
 public class HighlightRenderPipeline {
+
+    private static final Set<Object> NODE_BLOCKS = Set.of(
+            Blocks.DYED_TERRACOTTA.magenta(),
+            Blocks.DYED_TERRACOTTA.purple()
+    );
+
+    private static final Set<Object> MC_HEADS = Set.of(
+            Blocks.CREEPER_HEAD,
+            Blocks.CREEPER_WALL_HEAD,
+            Blocks.PLAYER_HEAD,
+            Blocks.PLAYER_WALL_HEAD
+    );
+
 
     private static final RenderPipeline FILLED_THROUGH_WALLS = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
@@ -48,7 +60,7 @@ public class HighlightRenderPipeline {
                     .build()
     );
 
-    private static List<HighlightRenderState> highlightStates = new ArrayList<>();
+    private static List<HighlightRenderState> highlightNodes = new ArrayList<>();
 
     private record HighlightRenderState(int x, int y, int z, float r, float g, float b, float a) { }
 
@@ -65,9 +77,12 @@ public class HighlightRenderPipeline {
 
     private static void extractHighlights(LevelExtractionContext context) {
         if (!ModKeybinds.isEnabledNodeESP()){
-            highlightStates = new ArrayList<>();
+            highlightNodes = new ArrayList<>();
             return;
         }
+//        if (!ModKeybinds.isEnabledGiftESP()){
+
+//        }
         ClientLevel world = Minecraft.getInstance().level;
         LocalPlayer player = Minecraft.getInstance().player;
 
@@ -84,8 +99,8 @@ public class HighlightRenderPipeline {
                     pos.set(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ() + z);
                     BlockState state = world.getBlockState(pos);
 
-                    if (state.getBlock() == Blocks.DYED_TERRACOTTA.magenta()
-                            || state.getBlock() == Blocks.DYED_TERRACOTTA.purple()) {
+
+                    if (NODE_BLOCKS.contains(state.getBlock()) || MC_HEADS.contains(state.getBlock())) {
                         found.add(new HighlightRenderState(
                                 pos.getX(), pos.getY(), pos.getZ(),
                                 1f, 0f, 0f, 0.5f
@@ -95,11 +110,11 @@ public class HighlightRenderPipeline {
             }
         }
 
-        highlightStates = found;
+        highlightNodes = found;
     }
 
     private static void drawHighlights(LevelRenderContext context) {
-        if (highlightStates.isEmpty()) return;
+        if (highlightNodes.isEmpty()) return;
 
         RenderPipeline renderPipeline = FILLED_THROUGH_WALLS;
         VertexFormat formatBinding = renderPipeline.getVertexFormatBinding(0);
@@ -117,7 +132,7 @@ public class HighlightRenderPipeline {
 
         var builder = stagedBuffer.getVertexBuilder(draw);
 
-        for (HighlightRenderState h : highlightStates) {
+        for (HighlightRenderState h : highlightNodes) {
             renderFilledBox(matrices.last().pose(), builder,
                     h.x(), h.y(), h.z(), h.x() + 1, h.y() + 1, h.z() + 1,
                     h.r(), h.g(), h.b(), h.a());
