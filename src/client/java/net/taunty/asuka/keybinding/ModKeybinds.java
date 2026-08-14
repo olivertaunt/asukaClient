@@ -7,28 +7,46 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.taunty.asuka.gui.ClickGUI;
+import net.taunty.asuka.player.GhostBlock;
 import org.lwjgl.glfw.GLFW;
 
 public class ModKeybinds{
     private static KeyMapping nodeEspKey;
     private static KeyMapping clickGuiKey;
+    private static KeyMapping ghostBlockToggle;
+    private static KeyMapping ghostBlockKey;
     private static boolean nodeESPToggle = false;
     private static boolean clickGUIToggle = false;
-    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("asuka", "render"));
+    private static final KeyMapping.Category RENDER = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("asuka", "render"));
+    private static final KeyMapping.Category PLAYER = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("asuka", "player"));
 
     public static void register() {
         nodeEspKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.asuka.node_esp",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_N,
-                CATEGORY
+                RENDER
         ));
 
         clickGuiKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.asuka.click_gui",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
-                CATEGORY
+                RENDER
+        ));
+
+        ghostBlockToggle = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.asuka.ghost_toggle:",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_P,
+                PLAYER
+        ));
+
+        ghostBlockKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.asuka.ghost_block:",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_G,
+                PLAYER
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client->{
@@ -41,11 +59,16 @@ public class ModKeybinds{
                 client.player.sendSystemMessage(Component.literal("Click GUI " + (clickGUIToggle ? "Enabled" : "Disabled")));
                 client.setScreenAndShow(new ClickGUI(Component.literal("taunty client")));
             }
+            while(ghostBlockToggle.consumeClick()){
+                GhostBlock.get().toggle();
+                client.player.sendSystemMessage(Component.literal("Ghost Block " + (GhostBlock.get().isEnabled() ? "Enabled" : "Disabled")));
+            }
+            if (GhostBlock.get().isEnabled()) {
+                while (ghostBlockKey.consumeClick()) {
+                    GhostBlock.get().ghostTargetedBlock();
+                }
+            }
         });
-    }
-
-    public static boolean isEnabledClickGUI(){
-        return clickGUIToggle;
     }
 
     public static void toggleClickGUI(){
@@ -59,4 +82,5 @@ public class ModKeybinds{
     public static void toggleNodeESP(){
         nodeESPToggle = !nodeESPToggle;
     }
+
 }
