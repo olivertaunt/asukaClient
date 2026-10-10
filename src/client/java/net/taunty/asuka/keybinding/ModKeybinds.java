@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.taunty.asuka.gui.ClickGUI;
@@ -56,8 +58,6 @@ public class ModKeybinds{
             }
             while(clickGuiKey.consumeClick()){
                 toggleClickGUI();
-                client.player.sendSystemMessage(Component.literal("Click GUI " + (clickGUIToggle ? "Enabled" : "Disabled")));
-                client.setScreenAndShow(new ClickGUI(Component.literal("taunty client")));
             }
             while(ghostBlockToggle.consumeClick()){
                 GhostBlock.get().toggle();
@@ -72,6 +72,14 @@ public class ModKeybinds{
     }
 
     public static void toggleClickGUI(){
+        Minecraft client = Minecraft.getInstance();
+        if (client.gui.screen() instanceof ClickGUI) {
+            client.setScreenAndShow(null);
+            clickGUIToggle = false;
+        } else {
+            client.setScreenAndShow(new ClickGUI(Component.literal("asuka client")));
+            clickGUIToggle = true;
+        }
         clickGUIToggle = !clickGUIToggle;
     }
 

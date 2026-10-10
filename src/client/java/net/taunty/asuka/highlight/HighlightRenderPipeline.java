@@ -11,8 +11,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ColorCollection;
+import net.minecraft.world.phys.AABB;
 import net.taunty.asuka.keybinding.ModKeybinds;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -40,18 +46,25 @@ import java.util.*;
 
 public class HighlightRenderPipeline {
 
-    private static final Set<Object> NODE_BLOCKS = Set.of(
+    private static final int SCAN_INTERVAL = 10;
+    private static int tickCounter = 0;
+    private static BlockPos lastScanPos = null;
+
+    private static final Set<Block> NODE_BLOCKS = Set.of(
             Blocks.DYED_TERRACOTTA.magenta(),
             Blocks.DYED_TERRACOTTA.purple()
     );
 
-    private static final Set<Object> MC_HEADS = Set.of(
+    private static final Set<Block> MC_HEADS = Set.of(
             Blocks.CREEPER_HEAD,
             Blocks.CREEPER_WALL_HEAD,
             Blocks.PLAYER_HEAD,
             Blocks.PLAYER_WALL_HEAD
     );
 
+    private static final Set<EntityType<?>> ENTITY_TYPES = Set.of(
+            EntityTypes.ARMOR_STAND
+    );
 
     private static final RenderPipeline FILLED_THROUGH_WALLS = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
@@ -71,26 +84,37 @@ public class HighlightRenderPipeline {
             new StagedVertexBuffer(() -> "Highlight Buffer", 256);
 
     public static void register() {
-        LevelExtractionEvents.END_EXTRACTION.register(HighlightRenderPipeline::extractHighlights);
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            tickCounter++;
+            if (tickCounter >= SCAN_INTERVAL) {
+                tickCounter = 0;
+                extractHighlights();
+            }
+        });
         LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(HighlightRenderPipeline::drawHighlights);
     }
 
-    private static void extractHighlights(LevelExtractionContext context) {
+    private static void extractHighlights() {
         if (!ModKeybinds.isEnabledNodeESP()){
             highlightNodes = new ArrayList<>();
+            lastScanPos = null;
             return;
         }
-//        if (!ModKeybinds.isEnabledGiftESP()){
-
-//        }
         ClientLevel world = Minecraft.getInstance().level;
         LocalPlayer player = Minecraft.getInstance().player;
+
 
         if (world == null || player == null) return;
 
         List<HighlightRenderState> found = new ArrayList<>();
         BlockPos playerPos = player.blockPosition();
         int searchRadius = 32; // blocks, tune this later
+
+        if (lastScanPos != null &&
+                playerPos.distSqr(lastScanPos) < 16) {
+            return;
+        }
+        lastScanPos = playerPos;
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int x = -searchRadius; x <= searchRadius; x++) {
@@ -99,7 +123,6 @@ public class HighlightRenderPipeline {
                     pos.set(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ() + z);
                     BlockState state = world.getBlockState(pos);
 
-
                     if (NODE_BLOCKS.contains(state.getBlock()) || MC_HEADS.contains(state.getBlock())) {
                         found.add(new HighlightRenderState(
                                 pos.getX(), pos.getY(), pos.getZ(),
@@ -107,6 +130,18 @@ public class HighlightRenderPipeline {
                         ));
                     }
                 }
+            }
+        }
+
+        AABB searchBox = new AABB(playerPos).inflate(searchRadius);
+        for (Entity entity : world.getEntities((Entity) null, searchBox, e -> ENTITY_TYPES.contains(e.getType()))) {
+            BlockPos entityPos = entity.blockPosition().offset(0, 2, 0);
+            BlockState frozenTreasure = world.getBlockState(entityPos);
+            if (frozenTreasure.is(Blocks.ICE)) {
+                found.add(new HighlightRenderState(
+                        entityPos.getX(), entityPos.getY(), entityPos.getZ(),
+                        1f, 0f, 0f, 0.5f
+                ));
             }
         }
 

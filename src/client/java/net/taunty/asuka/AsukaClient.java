@@ -3,6 +3,7 @@ package net.taunty.asuka;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.taunty.asuka.commands.CommandManager;
 import net.taunty.asuka.discord.DiscordPresence;
 import net.taunty.asuka.highlight.HighlightRenderPipeline;
 import net.taunty.asuka.keybinding.ModKeybinds;
@@ -16,6 +17,7 @@ public class AsukaClient implements ClientModInitializer {
 
         ModKeybinds.register();
         DiscordPresence.init();
+        CommandManager.register();
         ClientLifecycleEvents.CLIENT_STOPPING.register(client->DiscordPresence.shutdown());
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client)->{
             GhostBlock.get().restoreAll();

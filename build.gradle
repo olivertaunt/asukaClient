@@ -42,6 +42,10 @@ dependencies {
 
 	// discord rp
 	implementation include("io.github.CDAGaming:DiscordIPC:0.10.2")
+
+	// unix socket support for linux
+	implementation include("com.kohlschutter.junixsocket:junixsocket-common:2.10.1")
+	implementation include("com.kohlschutter.junixsocket:junixsocket-native-common:2.10.1")
 }
 
 processResources {
