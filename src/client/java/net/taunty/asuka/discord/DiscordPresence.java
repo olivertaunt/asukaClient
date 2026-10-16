@@ -72,7 +72,7 @@ public class DiscordPresence {
         try{
             client.connect();
             initialized=true;
-        } catch(NoDiscordClientException e){
+        } catch(NoDiscordClientException | IllegalStateException e){
             e.printStackTrace();
         }
     }
