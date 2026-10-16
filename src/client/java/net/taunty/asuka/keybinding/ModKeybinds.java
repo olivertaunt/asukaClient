@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.taunty.asuka.gui.ClickGUI;
 import net.taunty.asuka.player.GhostBlock;
+import net.taunty.asuka.player.freecam.Freecam;
 import org.lwjgl.glfw.GLFW;
 
 public class ModKeybinds{
@@ -17,6 +18,7 @@ public class ModKeybinds{
     private static KeyMapping clickGuiKey;
     private static KeyMapping ghostBlockToggle;
     private static KeyMapping ghostBlockKey;
+    private static KeyMapping freecamKey;
     private static boolean nodeESPToggle = false;
     private static boolean clickGUIToggle = false;
     private static final KeyMapping.Category RENDER = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("asuka", "render"));
@@ -51,6 +53,13 @@ public class ModKeybinds{
                 PLAYER
         ));
 
+        freecamKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.asuka.freecam:",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_U,
+                PLAYER
+        ));
+
         ClientTickEvents.END_CLIENT_TICK.register(client->{
             while(nodeEspKey.consumeClick()){
                 toggleNodeESP();
@@ -62,6 +71,9 @@ public class ModKeybinds{
             while(ghostBlockToggle.consumeClick()){
                 GhostBlock.get().toggle();
                 client.player.sendSystemMessage(Component.literal("Ghost Block " + (GhostBlock.get().isEnabled() ? "Enabled" : "Disabled")));
+            }
+            while (freecamKey.consumeClick()) {
+                Freecam.toggle();
             }
             if (GhostBlock.get().isEnabled()) {
                 while (ghostBlockKey.consumeClick()) {
@@ -86,9 +98,9 @@ public class ModKeybinds{
     public static boolean isEnabledNodeESP(){
         return nodeESPToggle;
     }
-
     public static void toggleNodeESP(){
         nodeESPToggle = !nodeESPToggle;
     }
+
 
 }
