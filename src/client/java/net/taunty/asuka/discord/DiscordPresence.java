@@ -5,10 +5,12 @@ import com.google.gson.JsonObject;
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.IPCListener;
 import com.jagrosh.discordipc.entities.ActivityType;
+import com.jagrosh.discordipc.entities.Callback;
 import com.jagrosh.discordipc.entities.Packet;
 import com.jagrosh.discordipc.entities.RichPresence;
 import com.jagrosh.discordipc.entities.User;
 import com.jagrosh.discordipc.exceptions.NoDiscordClientException;
+import net.taunty.asuka.Asuka;
 
 
 public class DiscordPresence {
@@ -31,18 +33,25 @@ public class DiscordPresence {
                         .setStartTimestamp(System.currentTimeMillis() / 1000L)
                         .setLargeImage("wfuxbwye", "Asuka Client")
                                 .setActivityType(ActivityType.Playing);
-                client.sendRichPresence(builder.build());
+                User user = client.getCurrentUser();
+                Asuka.LOGGER.info("Asuka connected to Discord {} as {}; requesting activity update for application {}.",
+                        client.getDiscordBuild(), user == null ? "unknown" : user.getName(), CLIENT_ID);
+                client.sendRichPresence(builder.build(), new Callback(
+                        packet -> Asuka.LOGGER.info("Discord accepted Asuka's activity update. Activity response: {}",
+                                packet.getJson().get("data")),
+                        error -> Asuka.LOGGER.warn("Discord rejected Asuka's activity update: {}", error)
+                ));
 
             }
 
             @Override
             public void onClose(IPCClient client, JsonObject json) {
-
+                Asuka.LOGGER.info("Asuka Discord presence connection closed.");
             }
 
             @Override
             public void onDisconnect(IPCClient client, Throwable t) {
-
+                Asuka.LOGGER.warn("Asuka Discord presence disconnected.", t);
             }
 
             @Override
@@ -73,7 +82,8 @@ public class DiscordPresence {
             client.connect();
             initialized=true;
         } catch(NoDiscordClientException | IllegalStateException e){
-            e.printStackTrace();
+            initialized=false;
+            Asuka.LOGGER.warn("Could not start Asuka Discord presence.", e);
         }
     }
 

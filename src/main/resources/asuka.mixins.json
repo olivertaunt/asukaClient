@@ -11,6 +11,8 @@
 	"client": [
 		"LevelRendererMixin",
 		"PlayerInfoMixin",
-		"TitleScreenMixin"
+		"TitleScreenMixin",
+		"KeyboardInputMixin",
+		"MouseInputMixin"
 	]
 }

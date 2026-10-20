@@ -1,6 +1,12 @@
 plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
+	id 'com.gradleup.shadow' version '9.6.1'
+}
+
+configurations {
+	shade
+	implementation.extendsFrom shade
 }
 
 loom {
@@ -41,11 +47,23 @@ dependencies {
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// discord rp
-	implementation include("io.github.CDAGaming:DiscordIPC:0.10.2")
+	// Bundle the socket dependencies too; Minecraft provides Gson and SLF4J.
+	shade("io.github.CDAGaming:DiscordIPC:0.10.2") {
+		exclude group: 'com.google.code.gson', module: 'gson'
+		exclude group: 'org.slf4j', module: 'slf4j-api'
+	}
+}
 
-	// unix socket support for linux
-	implementation include("com.kohlschutter.junixsocket:junixsocket-common:2.10.1")
-	implementation include("com.kohlschutter.junixsocket:junixsocket-native-common:2.10.1")
+shadowJar {
+	from sourceSets.client.output
+	configurations = [project.configurations.shade]
+	relocate 'com.jagrosh.discordipc', 'net.taunty.asuka.shaded.discordipc'
+	mergeServiceFiles()
+	manifest.attributes 'Multi-Release': 'true'
+	archiveClassifier = ''
+	from("LICENSE") {
+		rename { "${it}_${project.name}" }
+	}
 }
 
 processResources {
@@ -72,6 +90,8 @@ java {
 }
 
 jar {
+	archiveClassifier = 'dev'
+	destinationDirectory = layout.buildDirectory.dir('devlibs')
 	def projectName = project.name
 	inputs.property "projectName", projectName
 
