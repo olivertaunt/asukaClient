@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.taunty.asuka.gui.ClickGUI;
+import net.taunty.asuka.highlight.HandheldAnimation;
 import net.taunty.asuka.player.GhostBlock;
 import net.taunty.asuka.player.freecam.Freecam;
 import org.lwjgl.glfw.GLFW;
@@ -19,8 +20,11 @@ public class ModKeybinds{
     private static KeyMapping ghostBlockToggle;
     private static KeyMapping ghostBlockKey;
     private static KeyMapping freecamKey;
+    private static KeyMapping animationKey;
+
     private static boolean nodeESPToggle = false;
     private static boolean clickGUIToggle = false;
+
     private static final KeyMapping.Category RENDER = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("asuka", "render"));
     private static final KeyMapping.Category PLAYER = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("asuka", "player"));
 
@@ -60,6 +64,13 @@ public class ModKeybinds{
                 PLAYER
         ));
 
+        animationKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.asuka.animation:",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_O,
+                RENDER
+        ));
+
         ClientTickEvents.END_CLIENT_TICK.register(client->{
             while(nodeEspKey.consumeClick()){
                 toggleNodeESP();
@@ -74,6 +85,9 @@ public class ModKeybinds{
             }
             while (freecamKey.consumeClick()) {
                 Freecam.toggle();
+            }
+            while (animationKey.consumeClick()) {
+                HandheldAnimation.toggle();
             }
             if (GhostBlock.get().isEnabled()) {
                 while (ghostBlockKey.consumeClick()) {

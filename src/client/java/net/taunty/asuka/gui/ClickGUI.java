@@ -11,6 +11,14 @@ public class ClickGUI extends Screen {
 
     private static final int BACKGROUND_COLOUR = 0xE0101018;
     private static final int ACCENT_COLOUR = 0xFF7A5AC7;
+    private static final int BORDER_COLOUR = 0xFF454052;
+
+
+    private enum Category {
+        VISUAL, PLAYER, WORLD
+    }
+
+    private Category selectedCategory = Category.VISUAL;
 
 
     public ClickGUI(Component title) {
@@ -71,16 +79,51 @@ public class ClickGUI extends Screen {
         boolean NodeESP = ModKeybinds.isEnabledNodeESP();
         boolean ghostBlock = GhostBlock.get().isEnabled();
 
-        int panelX = width / 2 - 150;
-        int panelY = height / 2 - 90;
-        int panelW = 300;
-        int panelH = 180;
+        int panelW = 440;
+        int panelH = 240;
+        int panelY = (height - panelH) / 2;
+        int panelX = (width - panelW) / 2;
 
-        // background :p
-        graphics.fill(panelX, panelY, panelX + panelW, panelY+panelH, BACKGROUND_COLOUR);
+        int headerH = 24;
+        int sidebarW = 85;
+        int moduleListW = 165;
+
+        // window
+        graphics.fill(panelX, panelY, panelX + panelW, panelY + panelH, BACKGROUND_COLOUR);
+
+        // header
+        graphics.fill(panelX, panelY, panelX + panelW, panelY + headerH, 0xFF181820);
+
+        // sidebar
+        graphics.fill(panelX, panelY + headerH, panelX + sidebarW, panelY + panelH, 0xFF14141C);
+
+        // moduleList
+        graphics.fill(panelX + sidebarW, panelY + headerH, panelX + sidebarW + moduleListW, panelY + panelH, 0xFF181820);
 
         // border
-        graphics.fill(panelX, panelY, panelX + panelW, panelY + 2, ACCENT_COLOUR);
+        graphics.outline(panelX, panelY, panelW, panelH, 0xFF454052);
+
+        int sidebarEnd = panelX + sidebarW;
+        int modulesEnd = sidebarEnd + moduleListW;
+
+        graphics.fill(sidebarEnd, panelY + headerH,
+                sidebarEnd + 1, panelY + panelH, BORDER_COLOUR);
+
+        graphics.fill(modulesEnd, panelY + headerH,
+                modulesEnd + 1, panelY + panelH, BORDER_COLOUR);
+
+        int categoryY = panelY + headerH + 8;
+        int categoryH = 26;
+
+        for (Category category : Category.values()) {
+            if (category == selectedCategory) {
+                graphics.fill(panelX + 1, categoryY, panelX + sidebarW, categoryY + categoryH, ACCENT_COLOUR);
+            }
+            graphics.text(this.font, category.name(), panelX + 10, categoryY + 9, 0xFFFFFFFF, false);
+            categoryY += categoryH;
+        }
+
+
 
         graphics.text(this.font, "Asuka", panelX + 10, panelY + 10, ACCENT_COLOUR, false);
 
