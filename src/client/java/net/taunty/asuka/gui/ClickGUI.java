@@ -7,11 +7,19 @@ import net.minecraft.network.chat.Component;
 import net.taunty.asuka.keybinding.ModKeybinds;
 import net.taunty.asuka.player.GhostBlock;
 
+import java.awt.*;
+
 public class ClickGUI extends Screen {
 
     private static final int BACKGROUND_COLOUR = 0xE0101018;
     private static final int ACCENT_COLOUR = 0xFF7A5AC7;
     private static final int BORDER_COLOUR = 0xFF454052;
+
+    private static final int PANEL_WIDTH = 440;
+    private static final int PANEL_HEIGHT = 240;
+    private static final int HEADER_HEIGHT = 24;
+    private static final int SIDEBAR_WIDTH = 85;
+    private static final int MODULE_LIST_WIDTH = 165;
 
 
     private enum Category {
@@ -29,24 +37,41 @@ public class ClickGUI extends Screen {
     protected void init() {
     }
 
-    private record ButtonBounds(int x, int y, int width, int height) {}
-
-    /**
-     * it's what the method says.
-     * @return bounds object
-     */
-    private ButtonBounds getNodeESPButton() {
-        int panelX = width / 2 - 145;
-        int panelY = height / 2 - 60;
-        int btnX = panelX + 10, btnY = panelY + 40, btnW = 75, btnH = 20;
-        return new ButtonBounds(btnX, btnY, btnW, btnH);
+    private record ButtonBounds(int x, int y, int width, int height) {
+        boolean contains(double mouseX, double mouseY) {
+            return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+        }
     }
 
-    private ButtonBounds getGhostBlockButton() {
-        int panelX = width / 2 - 145;
-        int panelY = height / 2 - 85;
-        int btnX = panelX + 10, btnY = panelY + 40, btnW = 75, btnH = 20;
-        return new ButtonBounds(btnX, btnY, btnW, btnH);
+    private ButtonBounds getModuleButton(int row) {
+        int panelX = (width - PANEL_WIDTH) / 2;
+        int panelY = (height - PANEL_HEIGHT) / 2;
+        int buttonX = panelX + SIDEBAR_WIDTH + 10;
+        int buttonY = panelY + HEADER_HEIGHT + 10 + row * 25;
+        return new ButtonBounds(buttonX, buttonY, MODULE_LIST_WIDTH - 20, 20);
+    }
+
+    private ButtonBounds getCategoryButton(int row) {
+        int panelX = (width - PANEL_WIDTH) / 2;
+        int panelY = (height - PANEL_HEIGHT) / 2;
+        int category = panelY + HEADER_HEIGHT + 8 + row * 26;
+        return new ButtonBounds(panelX + 1, category, SIDEBAR_WIDTH - 1, 26);
+    }
+
+    private void drawModules(GuiGraphicsExtractor graphics, Category selectedCategory, int mouseX, int mouseY) {
+        ButtonBounds boundsNE = getModuleButton(0);
+        ButtonBounds boundsGB = getModuleButton(0);
+
+        boolean nodeEspEnabled = ModKeybinds.isEnabledNodeESP();
+        boolean ghostBlock = GhostBlock.get().isEnabled();
+
+        if (selectedCategory == Category.VISUAL) {
+            drawModuleButton(graphics, boundsNE, "Node ESP", nodeEspEnabled, mouseX, mouseY);
+        } else if (selectedCategory == Category.PLAYER) {
+            //
+        } else if (selectedCategory == Category.WORLD) {
+            drawModuleButton(graphics, boundsGB, "Ghost Block", ghostBlock, mouseX, mouseY);
+        }
     }
 
     /**
@@ -59,83 +84,71 @@ public class ClickGUI extends Screen {
         double mouseX = event.x();
         double mouseY = event.y();
 
-        ButtonBounds boundsNE = getNodeESPButton();
-        ButtonBounds boundsGB = getGhostBlockButton();
-        if (mouseX >= boundsNE.x() && mouseX <= boundsNE.x() + boundsNE.width() && mouseY >= boundsNE.y() && mouseY <= boundsNE.y() + boundsNE.height()) {
+        ButtonBounds boundsNE = getModuleButton(1);
+        ButtonBounds boundsGB = getModuleButton(0);
+        for (Category category : Category.values()) {
+            ButtonBounds categoryBounds = getCategoryButton(category.ordinal());
+            if (categoryBounds.contains(mouseX, mouseY)) {
+                selectedCategory = category;
+                return true;
+            }
+        }
+        if (boundsNE.contains(mouseX, mouseY) && selectedCategory == Category.VISUAL) {
             ModKeybinds.toggleNodeESP();
             return true;
         }
-        if (mouseX >= boundsGB.x() && mouseX <= boundsGB.x() + boundsGB.width() && mouseY >= boundsGB.y() && mouseY <= boundsGB.y() + boundsGB.height()) {
+        if (boundsGB.contains(mouseX, mouseY) && selectedCategory == Category.WORLD) {
             GhostBlock.get().toggle();
             return true;
         }
         return super.mouseClicked(event, doubleClick);
     }
 
-    @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta){
-        ButtonBounds boundsNE = getNodeESPButton();
-        ButtonBounds boundsGB = getGhostBlockButton();
-        boolean NodeESP = ModKeybinds.isEnabledNodeESP();
-        boolean ghostBlock = GhostBlock.get().isEnabled();
-
-        int panelW = 440;
-        int panelH = 240;
-        int panelY = (height - panelH) / 2;
-        int panelX = (width - panelW) / 2;
-
-        int headerH = 24;
-        int sidebarW = 85;
-        int moduleListW = 165;
+    private void drawGuiComponents(GuiGraphicsExtractor graphics, int panelX, int panelY) {
+        int sidebarEnd = panelX + SIDEBAR_WIDTH;
+        int modulesEnd = sidebarEnd + MODULE_LIST_WIDTH;
 
         // window
-        graphics.fill(panelX, panelY, panelX + panelW, panelY + panelH, BACKGROUND_COLOUR);
-
+        graphics.fill(panelX, panelY, panelX + PANEL_WIDTH, panelY + PANEL_HEIGHT, BACKGROUND_COLOUR);
         // header
-        graphics.fill(panelX, panelY, panelX + panelW, panelY + headerH, 0xFF181820);
-
+        graphics.fill(panelX, panelY, panelX + PANEL_WIDTH, panelY + HEADER_HEIGHT, 0xFF181820);
         // sidebar
-        graphics.fill(panelX, panelY + headerH, panelX + sidebarW, panelY + panelH, 0xFF14141C);
-
+        graphics.fill(panelX, panelY + HEADER_HEIGHT, panelX + SIDEBAR_WIDTH, panelY + PANEL_HEIGHT, 0xFF14141C);
         // moduleList
-        graphics.fill(panelX + sidebarW, panelY + headerH, panelX + sidebarW + moduleListW, panelY + panelH, 0xFF181820);
-
+        graphics.fill(panelX + SIDEBAR_WIDTH, panelY + HEADER_HEIGHT, panelX + SIDEBAR_WIDTH + MODULE_LIST_WIDTH, panelY + PANEL_HEIGHT, 0xFF181820);
         // border
-        graphics.outline(panelX, panelY, panelW, panelH, 0xFF454052);
+        graphics.outline(panelX, panelY, PANEL_WIDTH, PANEL_HEIGHT, BORDER_COLOUR);
+        graphics.fill(sidebarEnd, panelY + HEADER_HEIGHT, sidebarEnd + 1, panelY + PANEL_HEIGHT, BORDER_COLOUR);
+        graphics.fill(modulesEnd, panelY + HEADER_HEIGHT, modulesEnd + 1, panelY + PANEL_HEIGHT, BORDER_COLOUR);
+        graphics.text(this.font, "Asuka", panelX + 10, panelY + 10, ACCENT_COLOUR, false);
+    }
 
-        int sidebarEnd = panelX + sidebarW;
-        int modulesEnd = sidebarEnd + moduleListW;
+    private void drawModuleButton(GuiGraphicsExtractor graphics, ButtonBounds bounds, String label, boolean enabled, int mouseX, int mouseY) {
+        boolean hovered = bounds.contains(mouseX, mouseY);
+        int colour = enabled || hovered ? ACCENT_COLOUR : 0xFF303040;
+        graphics.fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), colour);
+        graphics.text(this.font, label, bounds.x() + 8, bounds.y() + 6, 0xFFFFFFFF, false);
+    }
 
-        graphics.fill(sidebarEnd, panelY + headerH,
-                sidebarEnd + 1, panelY + panelH, BORDER_COLOUR);
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta){
+        int panelY = (height - PANEL_HEIGHT) / 2;
+        int panelX = (width - PANEL_WIDTH) / 2;
 
-        graphics.fill(modulesEnd, panelY + headerH,
-                modulesEnd + 1, panelY + panelH, BORDER_COLOUR);
 
-        int categoryY = panelY + headerH + 8;
+        drawGuiComponents(graphics, panelX, panelY);
+
+        int categoryY = panelY + HEADER_HEIGHT + 8;
         int categoryH = 26;
 
         for (Category category : Category.values()) {
+            ButtonBounds categoryBounds = getCategoryButton(selectedCategory.ordinal());
             if (category == selectedCategory) {
-                graphics.fill(panelX + 1, categoryY, panelX + sidebarW, categoryY + categoryH, ACCENT_COLOUR);
+                graphics.fill(categoryBounds.x(), categoryBounds.y(), categoryBounds.width() + categoryBounds.x(), categoryBounds.height() + categoryBounds.y(), ACCENT_COLOUR);
             }
             graphics.text(this.font, category.name(), panelX + 10, categoryY + 9, 0xFFFFFFFF, false);
             categoryY += categoryH;
         }
-
-
-
-        graphics.text(this.font, "Asuka", panelX + 10, panelY + 10, ACCENT_COLOUR, false);
-
-        boolean hoveredNE = mouseX >= boundsNE.x() && mouseX <= boundsNE.x() + boundsNE.width() && mouseY >= boundsNE.y() && mouseY <= boundsNE.y() + boundsNE.height();
-        boolean hoveredGB = mouseX >= boundsGB.x() && mouseX <= boundsGB.x() + boundsGB.width() && mouseY >= boundsGB.y() && mouseY <= boundsGB.y() + boundsGB.height();
-
-        graphics.fill(boundsNE.x(), boundsNE.y(), boundsNE.x() + boundsNE.width(), boundsNE.y() + boundsNE.height(), hoveredNE ? ACCENT_COLOUR : 0xFF303040);
-        graphics.fill(boundsNE.x(), boundsNE.y(), boundsNE.x() + boundsNE.width(), boundsNE.y() + boundsNE.height(), NodeESP ? ACCENT_COLOUR : 0xFF303040);
-        graphics.fill(boundsGB.x(), boundsGB.y(), boundsGB.x() + boundsGB.width(), boundsGB.y() + boundsGB.height(), hoveredGB ? ACCENT_COLOUR : 0xFF303040);
-        graphics.fill(boundsGB.x(), boundsGB.y(), boundsGB.x() + boundsGB.width(), boundsGB.y() + boundsGB.height(), ghostBlock ? ACCENT_COLOUR : 0xFF303040);
-
-        graphics.text(this.font, "Node ESP", boundsNE.x() + 8, boundsNE.y() + 6, 0xFFFFFFFF, false);
-        graphics.text(this.font, "Ghost Block", boundsGB.x() + 8, boundsGB.y() + 6, 0xFFFFFFFF, false);
+        drawModules(graphics, selectedCategory, mouseX, mouseY);
     }
 }
